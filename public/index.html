@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Registro de Compras</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg1:#4f46e5; --bg2:#7c3aed;
+    --card:#ffffff; --text:#1e293b; --muted:#64748b;
+    --accent:#4f46e5; --accent-h:#4338ca;
+    --ok:#16a34a; --err:#dc2626; --border:#e2e8f0;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif}
+  body{min-height:100vh;background:linear-gradient(135deg,var(--bg1),var(--bg2));color:var(--text)}
+
+  /* ---------- LOGIN ---------- */
+  .login-wrap{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+  .login-card{background:var(--card);border-radius:20px;padding:40px;width:100%;max-width:400px;
+    box-shadow:0 25px 60px rgba(0,0,0,.35);animation:aparecer .5s ease}
+  .login-card h1{font-size:26px;font-weight:800;margin-bottom:4px}
+  .login-card p.sub{color:var(--muted);font-size:14px;margin-bottom:28px}
+  .logo{width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,var(--bg1),var(--bg2));
+    display:flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:18px}
+
+  label{display:block;font-size:13px;font-weight:600;color:var(--muted);margin:16px 0 6px}
+  input,select{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:12px;
+    font-size:14px;outline:none;transition:.2s;background:#f8fafc}
+  input:focus,select:focus{border-color:var(--accent);background:#fff;box-shadow:0 0 0 4px rgba(79,70,229,.12)}
+  button{cursor:pointer;border:none;font-weight:600;transition:.2s}
+
+  .btn-primario{width:100%;margin-top:24px;padding:13px;border-radius:12px;background:var(--accent);
+    color:#fff;font-size:15px}
+  .btn-primario:hover{background:var(--accent-h);transform:translateY(-1px)}
+  .btn-secundario{padding:10px 18px;border-radius:10px;background:#eef2ff;color:var(--accent);font-size:14px}
+  .btn-secundario:hover{background:#e0e7ff}
+  .btn-verde{padding:10px 18px;border-radius:10px;background:var(--ok);color:#fff;font-size:14px}
+  .btn-verde:hover{filter:brightness(1.1)}
+
+  .msg{margin-top:16px;padding:11px 14px;border-radius:10px;font-size:13.5px;display:none}
+  .msg.error{display:block;background:#fef2f2;color:var(--err);border:1px solid #fecaca}
+  .msg.ok{display:block;background:#f0fdf4;color:var(--ok);border:1px solid #bbf7d0}
+
+  .demo{margin-top:22px;padding-top:16px;border-top:1px dashed var(--border);font-size:12.5px;color:var(--muted);line-height:1.7}
+  .demo code{background:#f1f5f9;padding:2px 6px;border-radius:6px;font-size:12px}
+
+  /* ---------- DASHBOARD ---------- */
+  .topbar{background:rgba(255,255,255,.12);backdrop-filter:blur(10px);color:#fff;
+    padding:14px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
+  .topbar .marca{font-weight:800;font-size:17px;display:flex;gap:10px;align-items:center}
+  .topbar .marca span.icono{background:rgba(255,255,255,.2);width:34px;height:34px;border-radius:10px;
+    display:inline-flex;align-items:center;justify-content:center}
+  .usuario-info{display:flex;align-items:center;gap:14px;font-size:14px}
+  .rol-badge{background:rgba(255,255,255,.22);padding:4px 12px;border-radius:999px;font-size:12px;font-weight:700}
+  .btn-salir{background:rgba(255,255,255,.18);color:#fff;padding:8px 16px;border-radius:10px;font-size:13.5px}
+  .btn-salir:hover{background:rgba(255,255,255,.3)}
+
+  .tabs{display:flex;gap:8px;padding:20px 28px 0;flex-wrap:wrap}
+  .tab{padding:10px 20px;border-radius:12px 12px 0 0;background:rgba(255,255,255,.55);color:var(--muted);
+    font-weight:600;font-size:14px;border:none}
+  .tab.activo{background:#fff;color:var(--accent)}
+
+  main{max-width:1000px;margin:0 auto;padding:0 28px 50px}
+  .panel{background:#fff;border-radius:0 18px 18px 18px;padding:30px;
+    box-shadow:0 15px 40px rgba(0,0,0,.15);display:none}
+  .panel.activo{display:block;animation:aparecer .35s ease}
+
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:26px}
+  .stat{background:linear-gradient(135deg,#eef2ff,#f5f3ff);border:1px solid #e0e7ff;border-radius:16px;padding:20px}
+  .stat .num{font-size:30px;font-weight:800;color:var(--accent)}
+  .stat .lbl{font-size:13px;color:var(--muted);font-weight:600;margin-top:4px}
+
+  h2{font-size:20px;font-weight:800;margin-bottom:18px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:700px){.grid2{grid-template-columns:1fr}}
+  .form-box{border:1px solid var(--border);border-radius:16px;padding:22px;background:#fafbff}
+  .form-box h3{font-size:15px;font-weight:700;margin-bottom:14px}
+
+  table{width:100%;border-collapse:collapse;font-size:14px;margin-top:6px}
+  th{text-align:left;padding:10px 12px;color:var(--muted);font-size:12px;text-transform:uppercase;
+    letter-spacing:.5px;border-bottom:2px solid var(--border)}
+  td{padding:11px 12px;border-bottom:1px solid var(--border)}
+  tr:hover td{background:#f8faff}
+  .total-row{font-weight:800;color:var(--accent)}
+
+  .fila-flex{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:18px}
+  .fila-flex > div{flex:1;min-width:200px}
+
+  @keyframes aparecer{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+  .vacio{color:var(--muted);text-align:center;padding:26px;font-size:14px}
+</style>
+</head>
+<body>
+
+<!-- ============ LOGIN ============ -->
+<div id="vista-login" class="login-wrap">
+  <div class="login-card">
+    <div class="logo">🛒</div>
+    <h1>Registro de Compras</h1>
+    <p class="sub">Inicia sesión para continuar</p>
+
+    <form id="form-login">
+      <label>Correo electrónico</label>
+      <input type="email" id="login-email" placeholder="tucorreo@ejemplo.com" required>
+      <label>Contraseña</label>
+      <input type="password" id="login-pass" placeholder="••••••••" required>
+      <button type="submit" class="btn-primario">Iniciar sesión</button>
+    </form>
+    <div id="login-msg" class="msg"></div>
+
+    <!-- <div class="demo">
+      <b>Usuarios de prueba</b><br>
+      Admin: <code>admin@demo.com</code> / <code>admin123</code><br>
+      Cliente: <code>cliente@demo.com</code> / <code>cliente123</code>
+    </div> -->
+  </div>
+</div>
+
+<!-- ============ DASHBOARD ============ -->
+<div id="vista-app" style="display:none">
+  <div class="topbar">
+    <div class="marca"><span class="icono">🛒</span> Registro de Compras</div>
+    <div class="usuario-info">
+      <span id="barra-nombre"></span>
+      <span class="rol-badge" id="barra-rol"></span>
+      <button class="btn-salir" onclick="salir()">Cerrar sesión</button>
+    </div>
+  </div>
+
+  <!-- Tabs CLIENTE -->
+  <div class="tabs" id="tabs-cliente" style="display:none">
+    <button class="tab activo" data-tab="c-inicio">🏠 Inicio</button>
+    <button class="tab" data-tab="c-nueva">➕ Nueva compra</button>
+  </div>
+
+  <!-- Tabs ADMIN -->
+  <div class="tabs" id="tabs-admin" style="display:none">
+    <button class="tab activo" data-tab="a-inicio">🏠 Inicio</button>
+    <button class="tab" data-tab="a-usuarios">👥 Usuarios</button>
+    <button class="tab" data-tab="a-exportar">⬇️ Exportar datos</button>
+  </div>
+
+  <main>
+    <!-- ===== PANELES CLIENTE ===== -->
+    <section id="c-inicio" class="panel activo">
+      <h2>Mi resumen</h2>
+      <div class="cards">
+        <div class="stat"><div class="num" id="c-total-items">0</div><div class="lbl">Artículos comprados</div></div>
+        <div class="stat"><div class="num" id="c-total-gasto">$0</div><div class="lbl">Total gastado</div></div>
+      </div>
+      <h2>Mis compras</h2>
+      <table id="c-tabla">
+        <thead><tr><th>Fecha</th><th>Producto</th><th>Cantidad</th><th>Valor unitario</th><th>Total</th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <p class="vacio" id="c-vacio">Aún no tienes compras registradas.</p>
+    </section>
+
+    <section id="c-nueva" class="panel">
+      <h2>Registrar nueva compra</h2>
+      <div class="form-box" style="max-width:520px">
+        <h3>📝 Formulario de compra</h3>
+        <form id="form-compra">
+          <label>¿Qué compraste?</label>
+          <input type="text" id="compra-item" placeholder="Ej: Cuaderno profesional" required>
+          <label>¿Cuántos?</label>
+          <input type="number" id="compra-cantidad" min="1" value="1" required>
+          <label>Valor unitario</label>
+          <input type="number" id="compra-valor" min="0" step="any" placeholder="Ej: 8500" required>
+          <label>Fecha (automática)</label>
+          <input type="text" id="compra-fecha" disabled>
+          <button type="submit" class="btn-primario">Guardar compra</button>
+        </form>
+        <div id="compra-msg" class="msg"></div>
+      </div>
+    </section>
+
+    <!-- ===== PANELES ADMIN ===== -->
+    <section id="a-inicio" class="panel">
+      <h2>Panel de administración</h2>
+      <div class="cards">
+        <div class="stat"><div class="num" id="a-total-clientes">0</div><div class="lbl">Clientes registrados</div></div>
+        <div class="stat"><div class="num" id="a-total-compras">0</div><div class="lbl">Compras totales</div></div>
+      </div>
+      <p style="color:var(--muted);font-size:14px;line-height:1.7">
+        Desde aquí puedes gestionar los usuarios de la plataforma y exportar los registros
+        de compras de cualquier cliente en formato CSV (compatible con Excel).
+      </p>
+    </section>
+
+    <section id="a-usuarios" class="panel">
+      <h2>Usuarios</h2>
+      <div class="grid2">
+        <div class="form-box">
+          <h3>➕ Añadir nuevo usuario</h3>
+          <form id="form-usuario">
+            <label>Nombre completo</label>
+            <input type="text" id="u-nombre" required>
+            <label>Correo electrónico</label>
+            <input type="email" id="u-email" required>
+            <label>Contraseña</label>
+            <input type="password" id="u-pass" minlength="6" required>
+            <label>Rol</label>
+            <select id="u-rol">
+              <option value="cliente">Cliente</option>
+              <option value="admin">Administrador</option>
+            </select>
+            <button type="submit" class="btn-primario">Crear usuario</button>
+          </form>
+          <div id="usuario-msg" class="msg"></div>
+        </div>
+        <div>
+          <table id="a-tabla-usuarios">
+            <thead><tr><th>Nombre</th><th>Email</th><th>Registrado</th></tr></thead>
+            <tbody></tbody>
+          </table>
+          <p class="vacio" id="a-vacio-usuarios">No hay clientes registrados.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="a-exportar" class="panel">
+      <h2>Exportar registros de compras</h2>
+      <div class="form-box" style="max-width:560px">
+        <h3>⬇️ Descargar datos de un cliente</h3>
+        <div class="fila-flex">
+          <div>
+            <label>Selecciona el cliente</label>
+            <select id="export-cliente"></select>
+          </div>
+          <button class="btn-verde" onclick="exportarCSV()">Descargar CSV</button>
+        </div>
+        <p style="color:var(--muted);font-size:13px">
+          Se descargará un archivo <code>.csv</code> con todas las compras del cliente seleccionado,
+          listo para abrir en Excel o Google Sheets.
+        </p>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+const API = '/api';
+let token = localStorage.getItem('token');
+let usuario = JSON.parse(localStorage.getItem('usuario') || 'null');
+
+// ---------- utilidades ----------
+const $ = id => document.getElementById(id);
+const fmt = n => '$' + Number(n).toLocaleString('es-CO');
+function mostrarMsg(el, texto, ok = false) {
+  el.textContent = texto;
+  el.className = 'msg ' + (ok ? 'ok' : 'error');
+}
+async function api(ruta, opciones = {}) {
+  const res = await fetch(API + ruta, {
+    ...opciones,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: 'Bearer ' + token } : {}),
+      ...(opciones.headers || {})
+    }
+  });
+  if (res.status === 401) { salir(); throw new Error('Sesión expirada'); }
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.mensaje || 'Error del servidor');
+  return data;
+}
+
+// ---------- login / sesión ----------
+$('form-login').addEventListener('submit', async e => {
+  e.preventDefault();
+  const btn = e.target.querySelector('button');
+  btn.disabled = true; btn.textContent = 'Ingresando...';
+  try {
+    const data = await api('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ email: $('login-email').value, password: $('login-pass').value })
+    });
+    token = data.token; usuario = data.usuario;
+    localStorage.setItem('token', token);
+    localStorage.setItem('usuario', JSON.stringify(usuario));
+    iniciarApp();
+  } catch (err) {
+    mostrarMsg($('login-msg'), err.message);
+  } finally {
+    btn.disabled = false; btn.textContent = 'Iniciar sesión';
+  }
+});
+
+function salir() {
+  localStorage.removeItem('token');
+  localStorage.removeItem('usuario');
+  location.reload();
+}
+
+// ---------- navegación por pestañas ----------
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('activo'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('activo'));
+    tab.classList.add('activo');
+    $(tab.dataset.tab).classList.add('activo');
+    if (tab.dataset.tab === 'c-nueva') $('compra-fecha').value = new Date().toLocaleString('es-CO');
+  });
+});
+
+// ---------- inicio ----------
+function iniciarApp() {
+  $('vista-login').style.display = 'none';
+  $('vista-app').style.display = 'block';
+  $('barra-nombre').textContent = usuario.nombre;
+  $('barra-rol').textContent = usuario.rol === 'admin' ? 'ADMINISTRADOR' : 'CLIENTE';
+
+  // Limpiar pestañas/paneles y activar solo los del rol correspondiente
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('activo'));
+  document.querySelectorAll('.panel').forEach(pl => pl.classList.remove('activo'));
+
+  const tabsId = usuario.rol === 'admin' ? 'tabs-admin' : 'tabs-cliente';
+  const primerPanel = usuario.rol === 'admin' ? 'a-inicio' : 'c-inicio';
+  $(tabsId).style.display = 'flex';
+  $(tabsId).querySelector('.tab').classList.add('activo');
+  $(primerPanel).classList.add('activo');
+
+  if (usuario.rol === 'admin') cargarAdmin();
+  else cargarCliente();
+}
+
+// ---------- CLIENTE ----------
+async function cargarCliente() {
+  try {
+    const compras = await api('/purchases/mine');
+    const tbody = $('c-tabla').querySelector('tbody');
+    tbody.innerHTML = '';
+    let items = 0, gasto = 0;
+    compras.forEach(c => {
+      items += c.cantidad;
+      gasto += c.cantidad * c.valor;
+      tbody.insertAdjacentHTML('beforeend', `<tr>
+        <td>${new Date(c.fecha).toLocaleString('es-CO')}</td>
+        <td>${c.item}</td><td>${c.cantidad}</td>
+        <td>${fmt(c.valor)}</td><td class="total-row">${fmt(c.cantidad * c.valor)}</td>
+      </tr>`);
+    });
+    $('c-total-items').textContent = items;
+    $('c-total-gasto').textContent = fmt(gasto);
+    $('c-vacio').style.display = compras.length ? 'none' : 'block';
+  } catch (err) { console.error(err); }
+}
+
+$('form-compra').addEventListener('submit', async e => {
+  e.preventDefault();
+  try {
+    await api('/purchases', {
+      method: 'POST',
+      body: JSON.stringify({
+        item: $('compra-item').value,
+        cantidad: $('compra-cantidad').value,
+        valor: $('compra-valor').value
+      })
+    });
+    mostrarMsg($('compra-msg'), '✅ Compra registrada correctamente.', true);
+    e.target.reset(); $('compra-cantidad').value = 1;
+    $('compra-fecha').value = new Date().toLocaleString('es-CO');
+    cargarCliente();
+  } catch (err) { mostrarMsg($('compra-msg'), err.message); }
+});
+
+// ---------- ADMIN ----------
+async function cargarAdmin() {
+  await cargarUsuariosAdmin();
+}
+async function cargarUsuariosAdmin() {
+  try {
+    const usuarios = await api('/admin/users');
+    const tbody = $('a-tabla-usuarios').querySelector('tbody');
+    tbody.innerHTML = '';
+    const select = $('export-cliente');
+    select.innerHTML = '';
+    usuarios.forEach(u => {
+      tbody.insertAdjacentHTML('beforeend', `<tr>
+        <td>${u.nombre}</td><td>${u.email}</td>
+        <td>${new Date(u.createdAt).toLocaleDateString('es-CO')}</td></tr>`);
+      select.insertAdjacentHTML('beforeend', `<option value="${u._id}">${u.nombre} (${u.email})</option>`);
+    });
+    $('a-total-clientes').textContent = usuarios.length;
+    $('a-vacio-usuarios').style.display = usuarios.length ? 'none' : 'block';
+  } catch (err) { console.error(err); }
+}
+
+$('form-usuario').addEventListener('submit', async e => {
+  e.preventDefault();
+  try {
+    await api('/admin/users', {
+      method: 'POST',
+      body: JSON.stringify({
+        nombre: $('u-nombre').value,
+        email: $('u-email').value,
+        password: $('u-pass').value,
+        rol: $('u-rol').value
+      })
+    });
+    mostrarMsg($('usuario-msg'), '✅ Usuario creado correctamente.', true);
+    e.target.reset();
+    cargarUsuariosAdmin();
+  } catch (err) { mostrarMsg($('usuario-msg'), err.message); }
+});
+
+async function exportarCSV() {
+  const id = $('export-cliente').value;
+  if (!id) return alert('Selecciona un cliente.');
+  const res = await fetch(API + '/admin/export/' + id, {
+    headers: { Authorization: 'Bearer ' + token }
+  });
+  if (!res.ok) return alert('Error al exportar.');
+  const blob = await res.blob();
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'compras_cliente.csv';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+// sesión activa -> entrar directo
+if (token && usuario) iniciarApp();
+</script>
+</body>
+</html>

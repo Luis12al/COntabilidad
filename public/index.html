@@ -87,7 +87,6 @@
   .fila-flex{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:18px}
   .fila-flex > div{flex:1;min-width:200px}
 
-  /* ---------- FILTROS ---------- */
 /* ---------- FILTROS MEJORADOS PARA MÓVIL ---------- */
   .filtros {
     display: flex;
@@ -144,8 +143,10 @@
     .tabs{padding:14px 14px 0; display: flex; width: 100%; overflow-x: auto;}
     .tab{white-space:nowrap; padding:9px 14px; font-size:13px; flex: 1; text-align: center;}
     
-    main{padding:0 12px 40px}
-    .panel{padding:20px 14px; border-radius:0 14px 14px 14px}
+    main{max-width:1000px;margin:0 auto;padding:0 16px 50px}
+    .panel{background:#fff;border-radius:0 18px 18px 18px;padding:24px 16px;
+    box-shadow:0 15px 40px rgba(0,0,0,.15);display:none; width: 100%; overflow: hidden;}
+    
     h2{font-size:18px}
     .login-card{padding:28px 22px}
     .btn-primario{padding:12px}
@@ -162,13 +163,10 @@
     .stat .num { font-size: 24px; }
 
     /* Forzar que los inputs de fecha se acomoden bien */
-    .rango {
-      flex-direction: column;
-      align-items: stretch;
-    }
-    .rango > div {
-      width: 100%;
-    }
+  .rango{display:flex;flex-direction:column;gap:12px;margin-bottom:22px; width: 100%;}
+  .rango > div{width: 100%;}
+  .rango input[type="date"]{width: 100%; max-width: 100%; box-sizing: border-box;}
+  .rango .btn-verde{width: 100%; box-sizing: border-box;}
 
     /* Tabla -> tarjetas apiladas limpias */
     table, thead, tbody, th, td, tr{display:block}

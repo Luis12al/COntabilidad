@@ -88,20 +88,47 @@
   .fila-flex > div{flex:1;min-width:200px}
 
   /* ---------- FILTROS ---------- */
-  .filtros{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
-  .chip{padding:8px 16px;border-radius:999px;background:#f1f5f9;color:var(--muted);
-    font-size:13px;font-weight:600;border:1.5px solid var(--border)}
-  .chip:hover{border-color:var(--accent)}
-  .chip.activo{background:var(--accent);border-color:var(--accent);color:#fff}
-  .rango{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-bottom:22px}
-  .rango > div{flex:1;min-width:140px}
-  .rango label{margin:0 0 6px}
-  .rango .btn-verde{flex:0 0 auto}
+/* ---------- FILTROS MEJORADOS PARA MÓVIL ---------- */
+  .filtros {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 6px;
+    margin-bottom: 14px;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+  .filtros::-webkit-scrollbar {
+    display: none; /* Ocultar barra de desplazamiento en móviles */
+  }
+  .chip {
+    flex-shrink: 0;
+    padding: 8px 16px;
+    border-radius: 999px;
+    background: #f1f5f9;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 600;
+    border: 1.5px solid var(--border);
+  }
+  .chip:hover { border-color: var(--accent); }
+  .chip.activo { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+  .rango {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    margin-bottom: 22px;
+  }
+  .rango > div { flex: 1; min-width: 130px; }
+  .rango label { margin: 0 0 6px; }
+  .rango .btn-verde { flex: 0 0 auto; width: 100%; } /* Botón filtrar ancho completo en móvil por comodidad */
 
   @keyframes aparecer{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
   .vacio{color:var(--muted);text-align:center;padding:26px;font-size:14px}
 
-  /* ---------- RESPONSIVE ---------- */
+/* ---------- RESPONSIVE MÓVIL (AJUSTADO) ---------- */
   @media(max-width:768px){
     .grid2{grid-template-columns:1fr}
     .cards{grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
@@ -109,19 +136,41 @@
     .stat .num{font-size:22px}
   }
   @media(max-width:640px){
-    .topbar{flex-wrap:wrap;gap:10px;padding:12px 16px}
-    .topbar .marca{font-size:15px}
-    .usuario-info{flex-wrap:wrap;gap:8px;font-size:13px}
-    .btn-salir{padding:7px 12px;font-size:12.5px}
-    .tabs{padding:14px 14px 0;flex-wrap:nowrap;overflow-x:auto}
-    .tab{white-space:nowrap;padding:9px 14px;font-size:13px}
-    main{padding:0 14px 40px}
-    .panel{padding:20px 16px;border-radius:0 14px 14px 14px}
-    h2{font-size:17px}
+    .topbar{flex-direction: column; align-items: flex-start; gap: 12px; padding: 14px 16px}
+    .topbar .marca{font-size:16px}
+    .usuario-info{width: 100%; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-size: 13px}
+    .btn-salir{padding:7px 12px; font-size:12.5px; margin-left: auto;}
+    
+    .tabs{padding:14px 14px 0; display: flex; width: 100%; overflow-x: auto;}
+    .tab{white-space:nowrap; padding:9px 14px; font-size:13px; flex: 1; text-align: center;}
+    
+    main{padding:0 12px 40px}
+    .panel{padding:20px 14px; border-radius:0 14px 14px 14px}
+    h2{font-size:18px}
     .login-card{padding:28px 22px}
     .btn-primario{padding:12px}
 
-    /* Tabla -> tarjetas apiladas */
+    /* Arreglar tarjetas de estadísticas en móviles pequeños (2 columnas o fluidas) */
+    .cards {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+    /* Hacer que la tarjeta de "Total gastado" ocupe todo el ancho inferior para destacar */
+    .cards .stat:last-child {
+      grid-column: span 2;
+    }
+    .stat .num { font-size: 24px; }
+
+    /* Forzar que los inputs de fecha se acomoden bien */
+    .rango {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .rango > div {
+      width: 100%;
+    }
+
+    /* Tabla -> tarjetas apiladas limpias */
     table, thead, tbody, th, td, tr{display:block}
     thead{display:none}
     tbody tr{border:1px solid var(--border);border-radius:14px;margin-bottom:12px;

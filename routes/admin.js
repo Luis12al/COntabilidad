@@ -13,7 +13,7 @@ router.get('/users', async (req, res) => {
     const usuarios = await User.find({ rol: 'cliente' }).select('nombre email createdAt');
     res.json(usuarios);
   } catch (err) {
-    res.status(500).json({ mensaje: 'Error al listar usuarios.', error: err.message });
+    res.status(500).json({ mensaje: 'Error al listar usuarios.' });
   }
 });
 
@@ -21,24 +21,31 @@ router.get('/users', async (req, res) => {
 router.post('/users', async (req, res) => {
   try {
     const { nombre, email, password, rol } = req.body;
+
     if (!nombre || !email || !password) {
       return res.status(400).json({ mensaje: 'Nombre, email y contraseña son obligatorios.' });
     }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ mensaje: 'El correo electrónico no es válido.' });
+    }
+    if (String(password).length < 8) {
+      return res.status(400).json({ mensaje: 'La contraseña debe tener al menos 8 caracteres.' });
+    }
 
-    const existe = await User.findOne({ email: email.toLowerCase().trim() });
+    const existe = await User.findOne({ email: String(email).toLowerCase().trim() });
     if (existe) return res.status(409).json({ mensaje: 'Ese email ya está registrado.' });
 
-    const hash = await bcrypt.hash(password, 10);
+    const hash = await bcrypt.hash(String(password), 12);
     const usuario = await User.create({
-      nombre: nombre.trim(),
-      email: email.toLowerCase().trim(),
+      nombre: String(nombre).trim(),
+      email: String(email).toLowerCase().trim(),
       password: hash,
       rol: rol === 'admin' ? 'admin' : 'cliente'
     });
 
     res.status(201).json({ id: usuario._id, nombre: usuario.nombre, email: usuario.email, rol: usuario.rol });
   } catch (err) {
-    res.status(500).json({ mensaje: 'Error al crear usuario.', error: err.message });
+    res.status(500).json({ mensaje: 'Error al crear usuario.' });
   }
 });
 
@@ -61,7 +68,7 @@ router.get('/export/:userId', async (req, res) => {
     res.setHeader('Content-Disposition', `attachment; filename="compras_${usuario.email}.csv"`);
     res.send(csv);
   } catch (err) {
-    res.status(500).json({ mensaje: 'Error al exportar.', error: err.message });
+    res.status(500).json({ mensaje: 'Error al exportar.' });
   }
 });
 

@@ -1,10 +1,12 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
-// Verifica el token y adjunta el usuario a req.user
+// Verifica el token (cookie httpOnly 'rc_token' o cabecera Bearer) y adjunta el usuario
 exports.proteger = async (req, res, next) => {
   const header = req.headers.authorization || '';
-  const token = header.startsWith('Bearer ') ? header.slice(7) : null;
+  const token =
+    (req.cookies && req.cookies.rc_token) ||
+    (header.startsWith('Bearer ') ? header.slice(7) : null);
 
   if (!token) {
     return res.status(401).json({ mensaje: 'No autorizado. Inicia sesión.' });

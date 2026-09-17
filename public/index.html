@@ -67,14 +67,13 @@
     box-shadow:0 15px 40px rgba(0,0,0,.15);display:none}
   .panel.activo{display:block;animation:aparecer .35s ease}
 
-  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:26px}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:16px;margin-bottom:26px}
   .stat{background:linear-gradient(135deg,#eef2ff,#f5f3ff);border:1px solid #e0e7ff;border-radius:16px;padding:20px}
-  .stat .num{font-size:30px;font-weight:800;color:var(--accent)}
+  .stat .num{font-size:28px;font-weight:800;color:var(--accent)}
   .stat .lbl{font-size:13px;color:var(--muted);font-weight:600;margin-top:4px}
 
   h2{font-size:20px;font-weight:800;margin-bottom:18px}
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-  @media(max-width:700px){.grid2{grid-template-columns:1fr}}
   .form-box{border:1px solid var(--border);border-radius:16px;padding:22px;background:#fafbff}
   .form-box h3{font-size:15px;font-weight:700;margin-bottom:14px}
 
@@ -88,8 +87,52 @@
   .fila-flex{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:18px}
   .fila-flex > div{flex:1;min-width:200px}
 
+  /* ---------- FILTROS ---------- */
+  .filtros{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+  .chip{padding:8px 16px;border-radius:999px;background:#f1f5f9;color:var(--muted);
+    font-size:13px;font-weight:600;border:1.5px solid var(--border)}
+  .chip:hover{border-color:var(--accent)}
+  .chip.activo{background:var(--accent);border-color:var(--accent);color:#fff}
+  .rango{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-bottom:22px}
+  .rango > div{flex:1;min-width:140px}
+  .rango label{margin:0 0 6px}
+  .rango .btn-verde{flex:0 0 auto}
+
   @keyframes aparecer{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
   .vacio{color:var(--muted);text-align:center;padding:26px;font-size:14px}
+
+  /* ---------- RESPONSIVE ---------- */
+  @media(max-width:768px){
+    .grid2{grid-template-columns:1fr}
+    .cards{grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+    .stat{padding:14px}
+    .stat .num{font-size:22px}
+  }
+  @media(max-width:640px){
+    .topbar{flex-wrap:wrap;gap:10px;padding:12px 16px}
+    .topbar .marca{font-size:15px}
+    .usuario-info{flex-wrap:wrap;gap:8px;font-size:13px}
+    .btn-salir{padding:7px 12px;font-size:12.5px}
+    .tabs{padding:14px 14px 0;flex-wrap:nowrap;overflow-x:auto}
+    .tab{white-space:nowrap;padding:9px 14px;font-size:13px}
+    main{padding:0 14px 40px}
+    .panel{padding:20px 16px;border-radius:0 14px 14px 14px}
+    h2{font-size:17px}
+    .login-card{padding:28px 22px}
+    .btn-primario{padding:12px}
+
+    /* Tabla -> tarjetas apiladas */
+    table, thead, tbody, th, td, tr{display:block}
+    thead{display:none}
+    tbody tr{border:1px solid var(--border);border-radius:14px;margin-bottom:12px;
+      padding:6px 0;background:#fbfcff}
+    td{display:flex;justify-content:space-between;align-items:center;gap:14px;
+      border-bottom:none;padding:8px 14px;font-size:13.5px}
+    td:last-child{border-bottom:none}
+    td::before{content:attr(data-label);font-weight:700;color:var(--muted);font-size:11.5px;
+      text-transform:uppercase;letter-spacing:.4px}
+    tr:hover td{background:transparent}
+  }
 </style>
 </head>
 <body>
@@ -110,11 +153,11 @@
     </form>
     <div id="login-msg" class="msg"></div>
 
-    <!-- <div class="demo">
-      <b>Usuarios de prueba</b><br>
+    <div class="demo">
+      <b>Usuarios</b><br>
       Admin: <code>admin@demo.com</code> / <code>admin123</code><br>
-      Cliente: <code>cliente@demo.com</code> / <code>cliente123</code>
-    </div> -->
+      Cliente: <code>sebas@usuario.com</code> / <code>cliente123</code>
+    </div>
   </div>
 </div>
 
@@ -146,16 +189,39 @@
     <!-- ===== PANELES CLIENTE ===== -->
     <section id="c-inicio" class="panel activo">
       <h2>Mi resumen</h2>
+
+      <!-- Filtros: Hoy es el predeterminado -->
+      <div class="filtros">
+        <button class="chip activo" data-filtro="hoy" onclick="cargarCliente('hoy')">📅 Hoy</button>
+        <button class="chip" data-filtro="ayer" onclick="cargarCliente('ayer')">Ayer</button>
+        <button class="chip" data-filtro="semana" onclick="cargarCliente('semana')">Última semana</button>
+        <button class="chip" data-filtro="mes" onclick="cargarCliente('mes')">Último mes</button>
+        <button class="chip" data-filtro="todas" onclick="cargarCliente('todas')">Todas</button>
+      </div>
+      <div class="rango">
+        <div>
+          <label>Desde</label>
+          <input type="date" id="f-desde">
+        </div>
+        <div>
+          <label>Hasta</label>
+          <input type="date" id="f-hasta">
+        </div>
+        <button class="btn-verde" onclick="filtrarPorFechas()">🔎 Filtrar</button>
+      </div>
+
       <div class="cards">
+        <div class="stat"><div class="num" id="c-total-compras">0</div><div class="lbl">Compras registradas</div></div>
         <div class="stat"><div class="num" id="c-total-items">0</div><div class="lbl">Artículos comprados</div></div>
         <div class="stat"><div class="num" id="c-total-gasto">$0</div><div class="lbl">Total gastado</div></div>
       </div>
-      <h2>Mis compras</h2>
+
+      <h2 id="c-titulo-tabla">Compras de hoy</h2>
       <table id="c-tabla">
         <thead><tr><th>Fecha</th><th>Producto</th><th>Cantidad</th><th>Valor unitario</th><th>Total</th></tr></thead>
         <tbody></tbody>
       </table>
-      <p class="vacio" id="c-vacio">Aún no tienes compras registradas.</p>
+      <p class="vacio" id="c-vacio">No hay compras en este periodo.</p>
     </section>
 
     <section id="c-nueva" class="panel">
@@ -245,6 +311,7 @@
 const API = '/api';
 let token = localStorage.getItem('token');
 let usuario = JSON.parse(localStorage.getItem('usuario') || 'null');
+let filtroActual = 'hoy';
 
 // ---------- utilidades ----------
 const $ = id => document.getElementById(id);
@@ -262,10 +329,40 @@ async function api(ruta, opciones = {}) {
       ...(opciones.headers || {})
     }
   });
-  if (res.status === 401) { salir(); throw new Error('Sesión expirada'); }
+  if (res.status === 401 && ruta !== '/auth/login') {
+    token = null; usuario = null;
+    localStorage.removeItem('token');
+    localStorage.removeItem('usuario');
+    $('vista-app').style.display = 'none';
+    $('vista-login').style.display = 'flex';
+    mostrarMsg($('login-msg'), 'Tu sesión ha expirado o el usuario ya no existe. Inicia sesión de nuevo.');
+    throw new Error('Sesión expirada');
+  }
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.mensaje || 'Error del servidor');
   return data;
+}
+
+// Fechas en hora local (evita problemas de zona horaria con UTC)
+function inicioDia(d){ const x = new Date(d); x.setHours(0,0,0,0); return x; }
+function finDia(d){ const x = new Date(d); x.setHours(23,59,59,999); return x; }
+function hoyISO(){ return new Date().toISOString().slice(0,10); }
+
+const TITULOS = { hoy:'Compras de hoy', ayer:'Compras de ayer', semana:'Compras de la última semana',
+                  mes:'Compras del último mes', todas:'Todas mis compras', custom:'Compras del periodo seleccionado' };
+
+function rangoFiltro(filtro) {
+  const hoy = new Date();
+  switch (filtro) {
+    case 'hoy':    return { desde: inicioDia(hoy), hasta: finDia(hoy) };
+    case 'ayer': { const a = new Date(); a.setDate(a.getDate() - 1);
+                   return { desde: inicioDia(a), hasta: finDia(a) }; }
+    case 'semana': { const d = new Date(); d.setDate(d.getDate() - 6);
+                   return { desde: inicioDia(d), hasta: finDia(hoy) }; }
+    case 'mes':  { const d = new Date(); d.setDate(d.getDate() - 29);
+                   return { desde: inicioDia(d), hasta: finDia(hoy) }; }
+    default:     return {}; // todas
+  }
 }
 
 // ---------- login / sesión ----------
@@ -313,6 +410,10 @@ function iniciarApp() {
   $('barra-nombre').textContent = usuario.nombre;
   $('barra-rol').textContent = usuario.rol === 'admin' ? 'ADMINISTRADOR' : 'CLIENTE';
 
+  // fechas del filtro personalizado: hoy por defecto
+  $('f-desde').value = hoyISO();
+  $('f-hasta').value = hoyISO();
+
   // Limpiar pestañas/paneles y activar solo los del rol correspondiente
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('activo'));
   document.querySelectorAll('.panel').forEach(pl => pl.classList.remove('activo'));
@@ -324,13 +425,25 @@ function iniciarApp() {
   $(primerPanel).classList.add('activo');
 
   if (usuario.rol === 'admin') cargarAdmin();
-  else cargarCliente();
+  else cargarCliente('hoy'); // filtro predeterminado: compras del día
 }
 
 // ---------- CLIENTE ----------
-async function cargarCliente() {
+async function cargarCliente(filtro = filtroActual) {
+  filtroActual = filtro;
+  // marcar chip activo
+  document.querySelectorAll('.chip').forEach(c =>
+    c.classList.toggle('activo', c.dataset.filtro === filtro));
+  $('c-titulo-tabla').textContent = TITULOS[filtro] || 'Mis compras';
+
   try {
-    const compras = await api('/purchases/mine');
+    const params = new URLSearchParams();
+    const r = rangoFiltro(filtro);
+    if (r.desde) params.set('desde', r.desde.toISOString());
+    if (r.hasta) params.set('hasta', r.hasta.toISOString());
+    const qs = params.toString();
+
+    const compras = await api('/purchases/mine' + (qs ? '?' + qs : ''));
     const tbody = $('c-tabla').querySelector('tbody');
     tbody.innerHTML = '';
     let items = 0, gasto = 0;
@@ -338,11 +451,50 @@ async function cargarCliente() {
       items += c.cantidad;
       gasto += c.cantidad * c.valor;
       tbody.insertAdjacentHTML('beforeend', `<tr>
-        <td>${new Date(c.fecha).toLocaleString('es-CO')}</td>
-        <td>${c.item}</td><td>${c.cantidad}</td>
-        <td>${fmt(c.valor)}</td><td class="total-row">${fmt(c.cantidad * c.valor)}</td>
+        <td data-label="Fecha">${new Date(c.fecha).toLocaleString('es-CO')}</td>
+        <td data-label="Producto">${c.item}</td>
+        <td data-label="Cantidad">${c.cantidad}</td>
+        <td data-label="Valor unitario">${fmt(c.valor)}</td>
+        <td data-label="Total" class="total-row">${fmt(c.cantidad * c.valor)}</td>
       </tr>`);
     });
+    $('c-total-compras').textContent = compras.length;
+    $('c-total-items').textContent = items;
+    $('c-total-gasto').textContent = fmt(gasto);
+    $('c-vacio').style.display = compras.length ? 'none' : 'block';
+  } catch (err) { console.error(err); }
+}
+
+// filtro personalizado por rango de fechas
+async function filtrarPorFechas() {
+  const d = $('f-desde').value, h = $('f-hasta').value;
+  if (!d || !h) return alert('Selecciona ambas fechas.');
+  if (d > h) return alert('La fecha "Desde" no puede ser mayor que "Hasta".');
+  filtroActual = 'custom';
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('activo'));
+  $('c-titulo-tabla').textContent = TITULOS.custom;
+
+  try {
+    const params = new URLSearchParams({
+      desde: inicioDia(new Date(d + 'T00:00')).toISOString(),
+      hasta: finDia(new Date(h + 'T00:00')).toISOString()
+    });
+    const compras = await api('/purchases/mine?' + params.toString());
+    const tbody = $('c-tabla').querySelector('tbody');
+    tbody.innerHTML = '';
+    let items = 0, gasto = 0;
+    compras.forEach(c => {
+      items += c.cantidad;
+      gasto += c.cantidad * c.valor;
+      tbody.insertAdjacentHTML('beforeend', `<tr>
+        <td data-label="Fecha">${new Date(c.fecha).toLocaleString('es-CO')}</td>
+        <td data-label="Producto">${c.item}</td>
+        <td data-label="Cantidad">${c.cantidad}</td>
+        <td data-label="Valor unitario">${fmt(c.valor)}</td>
+        <td data-label="Total" class="total-row">${fmt(c.cantidad * c.valor)}</td>
+      </tr>`);
+    });
+    $('c-total-compras').textContent = compras.length;
     $('c-total-items').textContent = items;
     $('c-total-gasto').textContent = fmt(gasto);
     $('c-vacio').style.display = compras.length ? 'none' : 'block';
@@ -363,7 +515,7 @@ $('form-compra').addEventListener('submit', async e => {
     mostrarMsg($('compra-msg'), '✅ Compra registrada correctamente.', true);
     e.target.reset(); $('compra-cantidad').value = 1;
     $('compra-fecha').value = new Date().toLocaleString('es-CO');
-    cargarCliente();
+    cargarCliente('hoy'); // refrescar el panel del día
   } catch (err) { mostrarMsg($('compra-msg'), err.message); }
 });
 
@@ -380,8 +532,8 @@ async function cargarUsuariosAdmin() {
     select.innerHTML = '';
     usuarios.forEach(u => {
       tbody.insertAdjacentHTML('beforeend', `<tr>
-        <td>${u.nombre}</td><td>${u.email}</td>
-        <td>${new Date(u.createdAt).toLocaleDateString('es-CO')}</td></tr>`);
+        <td data-label="Nombre">${u.nombre}</td><td data-label="Email">${u.email}</td>
+        <td data-label="Registrado">${new Date(u.createdAt).toLocaleDateString('es-CO')}</td></tr>`);
       select.insertAdjacentHTML('beforeend', `<option value="${u._id}">${u.nombre} (${u.email})</option>`);
     });
     $('a-total-clientes').textContent = usuarios.length;

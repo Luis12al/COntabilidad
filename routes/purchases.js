@@ -30,10 +30,20 @@ router.post('/', async (req, res) => {
   }
 });
 
-// GET /api/purchases/mine -> historial del cliente logueado
+// GET /api/purchases/mine?desde=ISO&hasta=ISO
+// Sin parámetros devuelve todo; con desde/hasta filtra por rango de fechas.
 router.get('/mine', async (req, res) => {
   try {
-    const compras = await Purchase.find({ usuario: req.user._id }).sort({ fecha: -1 });
+    const filtro = { usuario: req.user._id };
+    const { desde, hasta } = req.query;
+
+    if (desde || hasta) {
+      filtro.fecha = {};
+      if (desde) filtro.fecha.$gte = new Date(desde);
+      if (hasta) filtro.fecha.$lte = new Date(hasta);
+    }
+
+    const compras = await Purchase.find(filtro).sort({ fecha: -1 });
     res.json(compras);
   } catch (err) {
     res.status(500).json({ mensaje: 'Error al obtener compras.', error: err.message });
